@@ -1,17 +1,14 @@
 from django.urls import path
 from apps.api.views import (
-    # Authentication
-    AuthRegister,
-    AuthLogin,
-    AuthLogout,
-    AuthValid,
-    AuthRefresh,
-    
-    # User
-    UserInfo,
-    UserSolves,
-    UserProfile,
+    IsLive,
+)
 
+from apps.competition.views import (
+    Competitions,
+    CompetitionView,
+)
+
+from apps.core.views import (
     # Admin
     AdminChallengeList,
     AdminChallengeAdd,
@@ -22,13 +19,25 @@ from apps.api.views import (
     AdminTag,
     AdminConfig,
 
-    # Misc
-    IsLive,
+    # Authentication
+    AuthRegister,
+    AuthLogin,
+    AuthLogout,
+    AuthValid,
+    AuthRefresh,
 
+    # User
+    UserInfo,
+    UserSolves,
+    UserProfile,
+)
+
+from apps.ctf.views import (
     # App
     ChallengeList,
     ChallengeAttempt,
     Scoreboard,
+
     # ChallengeSolves,
     ChallengesSolves,
 )
@@ -60,6 +69,10 @@ urlpatterns = [
     path('admin/flag/', AdminFlag.as_view()),
     path('admin/tag/', AdminTag.as_view()),
     path('admin/config/', AdminConfig.as_view()),
+
+    # COMPETITION
+    path('competitions/', Competitions.as_view()),
+    path('competition/<str:slug>/', CompetitionView.as_view()),
 
     # MISC
     path('live/', IsLive.as_view()),

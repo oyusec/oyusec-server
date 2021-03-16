@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import (
     StandardChallenge,
     DynamicChallenge,
-    Config,
     Submission,
+    Config,
     Solve,
     Hint,
     Flag,

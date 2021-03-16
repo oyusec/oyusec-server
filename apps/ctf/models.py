@@ -4,10 +4,14 @@ from apps.core.models import (
     BaseUserProfile,
     BaseUser,
 )
+from apps.competition.models import (
+    Competition
+)
+
 from math import ceil
-from apps.ctf.consts import *
 from datetime import datetime, timedelta
 from django.utils import timezone
+from .consts import *
 
 
 class Challenge(BaseModel):
@@ -27,6 +31,8 @@ class Challenge(BaseModel):
     state = models.CharField(
         "State", choices=STATE_CHOICES, max_length=100, default=STATE_VISIBLE)
     max_attempts = models.PositiveIntegerField("Max attempts", default=0)
+    competition = models.ForeignKey(
+        Competition,  on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Challenge"
@@ -39,11 +45,16 @@ class Challenge(BaseModel):
         data = request.data
         submission = data['submission'].strip()
         flags = Flag.objects.filter(challenge=challenge)
+
         for flag in flags:
             if Flag.compare(flag, submission):
-                return True, "Зөв байна"
+                return True, SUBMISSION_CORRECT_MN
             else:
-                return False, "Буруу байна"
+                return False, SUBMISSION_WRONG_MN
+
+        # This will happen if challenge have no flag
+        # So returning false
+        return False, SUBMISSION_WRONG_MN
 
     @classmethod
     def solve(cls, user, challenge, request):
@@ -175,7 +186,7 @@ class Hint(BaseModel):
     state = models.CharField("State", choices=STATE_CHOICES,
                              max_length=100, default=STATE_VISIBLE)
 
-    cost = models.PositiveIntegerField("Татвар", default=0)
+    cost = models.PositiveIntegerField("Cost", default=0)
 
     class Meta:
         verbose_name = "Hint"

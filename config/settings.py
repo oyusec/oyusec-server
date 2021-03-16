@@ -3,10 +3,10 @@ from datetime import timedelta
 from os import path, getenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'CHANGEMELATER'
+SECRET_KEY = getenv('OYUSEC_SECRET', 'CHANGEMEINPRODUCTION')
 
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     # Custom apps
     'apps.core.apps.CoreConfig',
     'apps.ctf.apps.CtfConfig',
-    # 'apps.users',
+    'apps.competition',
     'apps.api',
 ]
 

@@ -44,3 +44,5 @@ STATE_LOCKED_MN = "Түгжигдсэн"
 TYPE_DYNAMIC_MN = 'динамик'
 TYPE_STANDARD_MN = 'стандарт'
 
+SUBMISSION_CORRECT_MN = 'Зөв байна'
+SUBMISSION_WRONG_MN = 'Буруу байна'

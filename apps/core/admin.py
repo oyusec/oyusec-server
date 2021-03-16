@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     BaseUser,
-    BaseUserProfile
+    BaseUserProfile,
 )
 
 admin.site.register(BaseUser)
