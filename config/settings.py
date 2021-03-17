@@ -87,6 +87,8 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://localhost:5000',
     'https://byamb4.github.io',
+    'https://oyusec.github.io',
+    'https://oyusec.ml',
 ]
 
 # AUTHENTICATION
