@@ -30,12 +30,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # Cors config
     'corsheaders.middleware.CorsMiddleware',
     # Builtin configs
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # Whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,14 +81,16 @@ else:
         }
     }
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://oyusec.github.io",
-#     "http://oyusec.ml",
-#     "http://localhost:3000",
-#     "http://localhost:5000"
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://oyusec.github.io",
+    "http://oyusec.ml",
+    "https://oyusec.github.io",
+    "https://oyusec.ml",
+    "http://localhost:3000",
+    "http://localhost:5000"
+]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 # AUTHENTICATION
 
 SIMPLE_JWT = {
