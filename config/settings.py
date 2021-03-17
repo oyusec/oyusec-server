@@ -5,8 +5,8 @@ from os import path, getenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = getenv('OYUSEC_SECRET', 'CHANGEMEINPRODUCTION')
 
-DEBUG = False
-# DEBUG = True
+# DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -84,8 +84,8 @@ else:
     }
 
 CORS_ALLOWED_ORIGINS = [
-    "https://oyusec.github.io",
-    "https://oyusec.ml",
+    "http://oyusec.github.io",
+    "http://oyusec.ml",
     "http://localhost:3000",
     "http://localhost:5000"
 ]
