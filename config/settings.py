@@ -81,16 +81,16 @@ else:
         }
     }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://oyusec.ml",
-    "https://oyusec.ml",
-    "https://oyusec.github.io",
-    "https://byamb4.github.io",
-    "http://localhost:3000",
-    "http://localhost:5000"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://oyusec.ml",
+#     "https://oyusec.ml",
+#     "https://oyusec.github.io",
+#     "https://byamb4.github.io",
+#     "http://localhost:3000",
+#     "http://localhost:5000"
+# ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 # AUTHENTICATION
 
 SIMPLE_JWT = {
