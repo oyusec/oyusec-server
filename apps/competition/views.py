@@ -1,14 +1,16 @@
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import localdate
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.shortcuts import get_object_or_404
 
 from apps.core.models import (
     BaseUser,
     BaseUserProfile
 )
+from apps.core.utils import *
 from apps.ctf.models import (
     Challenge
 )
@@ -18,6 +20,8 @@ from .models import (
     CompetitionUser,
     Competition,
 )
+from .utils import *
+
 from .consts import *
 
 
@@ -64,7 +68,17 @@ class CompetitionView(BaseView):
             'photo': competition.photo,
             'rule': competition.rule,
             'prize': competition.prize,
+            'location': competition.location,
+            'enrollment': get_enrollment(competition.enrollment),
+            'start_date': convert_to_localtime(competition.start_date),
+            'end_date': convert_to_localtime(competition.end_date),
+            'status': get_status(competition.status),
         }
+
+        if competition.status == COMPETITION_UPCOMING:
+            result['time_left'] = get_timeleft(competition.start_date)
+            return result
+        
         for challenge in Challenge.objects.filter(competition=competition):
             result['challenges'].append({
                 'name': challenge.name,

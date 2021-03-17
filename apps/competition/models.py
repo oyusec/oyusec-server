@@ -1,4 +1,5 @@
 from django.db import models
+from django.template.defaultfilters import slugify
 from apps.core.models import (
     BaseModel,
     BaseUser,
@@ -18,6 +19,11 @@ class Competition(BaseModel):
     prize = models.TextField()
     participants = models.ManyToManyField(
         BaseUser,  through='CompetitionUser')
+    location = models.CharField('Location', max_length=100, default='онлайн')
+    enrollment = models.CharField(
+        'Enrollment', max_length=100, default=ENROLLMENT_SOLO, choices=ENROLLMENT_CHOICES)
+    start_date = models.DateTimeField(auto_now_add=False, blank=True)
+    end_date = models.DateTimeField(auto_now_add=False, blank=True)
 
     class Meta:
         verbose_name = 'Competition'
