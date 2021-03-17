@@ -82,10 +82,10 @@ else:
     }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://oyusec.github.io",
     "http://oyusec.ml",
-    "https://oyusec.github.io",
     "https://oyusec.ml",
+    "https://oyusec.github.io",
+    "https://byamb4.github.io",
     "http://localhost:3000",
     "http://localhost:5000"
 ]
