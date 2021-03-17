@@ -89,6 +89,9 @@ CORS_ORIGIN_WHITELIST = [
     'https://byamb4.github.io',
     'https://oyusec.github.io',
     'https://oyusec.ml',
+    'http://byamb4.github.io',
+    'http://oyusec.github.io',
+    'http://oyusec.ml',
 ]
 
 # AUTHENTICATION
