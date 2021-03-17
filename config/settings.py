@@ -83,15 +83,11 @@ else:
         }
     }
 
-CORS_ORIGIN_WHITELIST = [
-    # 'http://localhost:3000',
-    # 'http://localhost:5000',
-    # 'https://byamb4.github.io',
-    'https://oyusec.github.io',
-    'https://oyusec.ml',
-    # 'http://byamb4.github.io',
-    # 'http://oyusec.github.io',
-    # 'http://oyusec.ml',
+CORS_ALLOWED_ORIGINS = [
+    "https://oyusec.github.io",
+    "https://oyusec.ml",
+    "http://localhost:3000",
+    "http://localhost:5000"
 ]
 
 # AUTHENTICATION
