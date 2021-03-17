@@ -62,6 +62,8 @@ class CompetitionView(BaseView):
             'name': competition.name,
             'description': competition.description,
             'photo': competition.photo,
+            'rule': competition.rule,
+            'prize': competition.prize,
         }
         for challenge in Challenge.objects.filter(competition=competition):
             result['challenges'].append({

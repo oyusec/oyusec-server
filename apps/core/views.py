@@ -456,6 +456,7 @@ class AuthRefresh(TokenRefreshView):
 class AuthLogout(BaseView):
     permission_classes = (IsAuthenticated,)
 
+    # Will implement this in future
     # def post(self, request):
     #     try:
     #         print(request.data)
@@ -538,3 +539,29 @@ class UserSolves(BaseView):
                 'challenge_id': solve.challenge.uuid
             })
         return Response({'success': True, 'data': response})
+
+
+class UserProfileSolves(BaseView):
+    def get(self, request, slug):
+        user = get_object_or_404(BaseUser, slug=slug)
+
+        response = self.serialize(user)
+
+        return Response({
+            'success': True,
+            'data': response
+        })
+
+    def serialize(self, user):
+        solves = Solve.objects.filter(user=user).order_by('-created_date')
+        res = []
+
+        for solve in solves:
+            res.append({
+                'created': solve.created_date.strftime('%d %B, %H:%M'),
+                'name': solve.challenge.name,
+                'category': solve.challenge.category,
+                'value': solve.challenge.value,
+            })
+
+        return res

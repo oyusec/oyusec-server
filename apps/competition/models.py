@@ -14,6 +14,8 @@ class Competition(BaseModel):
     slug = models.SlugField(null=False, unique=True)
     photo = models.URLField(
         null=True, blank=True, default="https://github.com/OyuTech/Utils/blob/main/oyusec/oyusec.png")
+    rule = models.TextField()
+    prize = models.TextField()
     participants = models.ManyToManyField(
         BaseUser,  through='CompetitionUser')
 
