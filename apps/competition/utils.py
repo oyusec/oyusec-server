@@ -1,4 +1,10 @@
 from django.utils import timezone
+from django.db.models import Sum
+from apps.ctf.models import Solve
+from operator import itemgetter
+from apps.ctf.consts import *
+
+from .models import CompetitionUser
 from .consts import *
 
 
@@ -28,3 +34,25 @@ def get_timeleft(data):
 
 def get_days_hours_minutes(data):
     return data.days, data.seconds // 3600, (data.seconds // 60) % 60
+
+
+def get_score(user, competition):
+    result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).aggregate(
+        Sum('challenge__value'))['challenge__value__sum']
+
+    if not result:
+        result = 0
+    return result
+
+
+def get_standings(competition):
+    res = []
+    for compUser in CompetitionUser.objects.filter(competition=competition):
+        score = get_score(compUser.user, competition)
+        if not score:
+            score = 0
+        res.append({
+            'username': compUser.user.username,
+            'score': score
+        })
+    return sorted(res, key=itemgetter('score'), reverse=True)

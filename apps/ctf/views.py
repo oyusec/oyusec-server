@@ -6,6 +6,10 @@ from .models import (
     Challenge
 )
 from apps.competition.consts import *
+from apps.competition.models import (
+    Competition,
+    CompetitionUser
+)
 
 
 class ChallengeList(BaseView):
@@ -68,6 +72,16 @@ class ChallengeAttempt(BaseView):
                     'detail': 'Тэмцээн эхлээгүй байна'
                 })
 
+            # If user submit flag, then we register user as participant
+            compUser = CompetitionUser.objects.filter(
+                user=user, competition=challenge.competition)
+
+            if not compUser:
+                compUser = CompetitionUser.objects.create(
+                    user=user,
+                    competition=challenge.competition,
+                )
+
         status, message = challenge.attempt(challenge, request)
 
         if status:
@@ -80,27 +94,6 @@ class ChallengeAttempt(BaseView):
             "status": "correct" if status else "incorrect",
             "detail": message
         })
-        # flags = Flag.objects.filter(challenge=challenge)
-
-        # for flag in flags:
-        #     if submission == flag.content:
-        #         if user.user_type == 'admin':
-
-        #             return Response({'success': True, 'status': 'correct'})
-
-        #         Solve.objects.create(
-        #             user=user,
-        #             challenge=challenge,
-        #             submission=submission
-        #         ).save()
-        #         return Response({'success': True, 'status': 'correct'})
-        # Submission.objects.create(
-        #     user=user,
-        #     challenge=challenge,
-        #     submission=submission
-        # ).save()
-
-        return Response({'success': True, 'status': 'wrong', 'detail': 'Буруу байна'})
 
 
 class ChallengesSolves(BaseView):

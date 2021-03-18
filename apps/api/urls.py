@@ -40,6 +40,7 @@ from apps.ctf.views import (
 from apps.competition.views import (
     Competitions,
     CompetitionView,
+    CompetitionScoreboard,
     CompetitionChallenges,
     CompetitionChallengesSolves,
 )
@@ -77,6 +78,7 @@ urlpatterns = [
     path('competitions/', Competitions.as_view()),
     path('competition/<str:slug>/', CompetitionView.as_view()),
     path('competition/<str:slug>/challenges/', CompetitionChallenges.as_view()),
+    path('competition/<str:slug>/scoreboard/', CompetitionScoreboard.as_view()),
     path('competition/<str:slug>/challenges/solves/',
          CompetitionChallengesSolves.as_view()),
 

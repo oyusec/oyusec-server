@@ -135,3 +135,11 @@ class CompetitionChallengesSolves(BaseView):
                 'solves': solves
             })
         return ret
+
+
+class CompetitionScoreboard(BaseView):
+    def get(self, request, slug):
+        competition = get_object_or_404(Competition, slug=slug)
+        standings = get_standings(competition)
+
+        return Response({'success': True, 'data': standings})

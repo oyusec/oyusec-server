@@ -6,13 +6,19 @@ from apps.ctf.models import (
     StandardChallenge,
     DynamicChallenge,
     Challenge,
+    Solve,
     Flag,
 )
 from apps.competition.models import (
     Competition,
+    CompetitionUser
 )
+from apps.core.consts import *
 from apps.ctf.consts import *
 from apps.competition.consts import *
+
+# Misc
+import random
 
 
 class Command(BaseCommand):
@@ -20,96 +26,114 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.create_admin()
+        self.create_users()
         self.create_competitions()
         self.create_challenges()
         self.create_flags()
+        self.create_solves()
 
     def create_admin(self):
         BaseUser.objects.create_superuser(
-            username='admin',
-            email='admin@gmail.com',
-            password='tmppass123'
+            username=FAKE_ADMIN,
+            email=FAKE_ADMIN_EMAIL,
+            password=FAKE_PASSWORD,
         )
+
         self.stdout.write("[+] Created admin")
+
+    def create_users(self):
+        user = BaseUser.objects.create(
+            username=FAKE_GUEST_USERNAME,
+            email=FAKE_GUEST_EMAIL
+        )
+        user.set_password(FAKE_PASSWORD)
+        user.save()
+
+        for _ in range(20):
+            user = BaseUser.objects.create(
+                username=f'{FAKE_USER_USERNAME}{_}',
+                email=f'{FAKE_USER_USERNAME}{_}@zxc.zxc',
+            )
+            user.set_password(FAKE_PASSWORD)
+            user.save()
+
+        self.stdout.write("[+] Created users")
 
     def create_competitions(self):
 
-        Competition.objects.create(
-            name='OyuSec CTF #5',
-            description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
-            rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
-            prize="""- $XXX\n- $YYY\n- $ZZZ""",
-            start_date=make_aware(datetime(2021, 3, 27, 18, 0)),
-            end_date=make_aware(datetime(2021, 3, 28, 18, 0)),
-            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Sudan+National+CTF+Thumbnail.jpg"
-        )
-        Competition.objects.create(
-            name='OyuSec CTF #2',
-            description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
-            rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
-            prize="""- $XXX\n- $YYY\n- $ZZZ""",
-            status=COMPETITION_LIVE,
-            start_date=make_aware(datetime(2021, 3, 15, 18, 0)),
-            end_date=make_aware(datetime(2021, 3, 16, 18, 0)),
-            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Kenya+National+CTF+Thumbnail.jpg",
-        )
+        for _ in range(10):
+            rand_date = random.randint(1, 29)
+            rand_hour = random.randint(0, 23)
+            rand_img = random.choice(FAKE_IMAGES)
+            rand_status = random.choice(FAKE_STATUS)
+            rand_location = random.choice(FAKE_COMPETITION_LOCATIONS)
 
-        Competition.objects.create(
-            name='OyuSec CTF #1',
-            description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
-            rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
-            prize="""- $XXX\n- $YYY\n- $ZZZ""",
-            status=COMPETITION_ARCHIVE,
-            start_date=make_aware(datetime(2021, 3, 10, 18, 0)),
-            end_date=make_aware(datetime(2021, 3, 11, 18, 0)),
-            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Saudi+Arabia+National+CTF+Thumbnail.jpg"
-        )
+            Competition.objects.create(
+                name=f'{FAKE_COMPETITION_NAME} #{_}',
+                description=FAKE_COMPETITION_DESCRIPTION,
+                prize=FAKE_COMPETITION_PRIZE,
+                rule=FAKE_COMPETITION_RULE,
+                location=rand_location,
+                enrollment=random.choice([ENROLLMENT_SOLO, ENROLLMENT_TEAM]),
+                start_date=make_aware(
+                    datetime(2021, 3, rand_date, rand_hour, 0)),
+                end_date=make_aware(
+                    datetime(2021, 3, rand_date + 1, rand_hour, 0)),
+                photo=rand_img,
+                status=rand_status,
+            )
 
     def create_challenges(self):
-        compettion1 = Competition.objects.all()[0]
-        compettion2 = Competition.objects.all()[1]
-        compettion3 = Competition.objects.all()[2]
 
-        StandardChallenge.objects.create(
-            name='Cypher Anxiety',
-            category='Forensics',
-            description='An image was leaked from a babies store. the manager is so annoyed because he needs to identify the image to fire charges against the responsible employee. the key is the md5 of the image',
-            competition=compettion1,
-        )
-
-        StandardChallenge.objects.create(
-            name='Hidden Message',
-            category='Forensics',
-            description='A cyber Criminal is hiding information in the below file . capture the flag ? submit Flag in MD5 Format [Link](https://s3-eu-west-1.amazonaws.com/talentchallenges/Forensics/hidden_message.jpg)',
-            competition=compettion2,
-        )
-
-        DynamicChallenge.objects.create(
-            name='Crack the Hash',
-            category='Cryptography',
-            description='A hacker leaked the below hash online.Can you crack it to know the password of the CEO? > 1ab566b9fa5c0297295743e7c2a6ec27',
-            competition=compettion3,
-        )
-        DynamicChallenge.objects.create(
-            name='Postbase',
-            category='Cryptography',
-            description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
-        )
-        DynamicChallenge.objects.create(
-            name='Postbase 2',
-            category='Cryptography',
-            description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
-        )
-        DynamicChallenge.objects.create(
-            name='Postbase 3',
-            category='Cryptography',
-            description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
-        )
+        # Public challenges
+        for _ in range(30):
+            DynamicChallenge.objects.create(
+                name=f'{FAKE_CHALLENGE_NAME} {_}',
+                category=random.choice(FAKE_CHALLENGE_CATEGORIES),
+                description=FAKE_CHALLENGE_DESCRIPTION,
+            )
+        # Competition challenges
+        for _ in range(40):
+            DynamicChallenge.objects.create(
+                name=f'{FAKE_COMPETITION_CHALLENGE_NAME} {_}',
+                category=random.choice(FAKE_CHALLENGE_CATEGORIES),
+                description=FAKE_CHALLENGE_DESCRIPTION,
+                competition=random.choice(Competition.objects.all()),
+            )
 
         self.stdout.write("[+] Created challenges")
 
     def create_flags(self):
+        # Makes all flag same
         for _ in Challenge.objects.all():
-            Flag.objects.create(content='flag{a}', challenge=_)
+            Flag.objects.create(content=FAKE_FLAG, challenge=_)
 
         self.stdout.write('[+] Created flags')
+
+    def create_solves(self):
+        self.stdout.write('[+] Creating solves')
+
+        for user in BaseUser.objects.filter(user_type=USER_TYPE_NORMAL):
+
+            challenges_id = list(Challenge.objects.filter(
+                state=STATE_VISIBLE).values_list('uuid', flat=True))
+            solves_challenges = random.sample(
+                challenges_id, min(len(challenges_id), 5))
+            challenges = Challenge.objects.filter(uuid__in=solves_challenges)
+
+            for challenge in challenges:
+                Solve.objects.create(
+                    user=user,
+                    challenge=challenge,
+                    submission=FAKE_FLAG
+                )
+                if challenge.competition:
+                    CompetitionUser.objects.create(
+                        user=user,
+                        competition=challenge.competition
+                    )
+
+        self.stdout.write('[+] Calculating dynamic values')
+
+        for challenge in DynamicChallenge.objects.filter(state=STATE_VISIBLE):
+            challenge.calculate_value(challenge)

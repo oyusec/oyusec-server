@@ -553,7 +553,10 @@ class UserProfileSolves(BaseView):
         })
 
     def serialize(self, user):
-        solves = Solve.objects.filter(user=user).order_by('-created_date')
+        # Returning only public challenges
+        # Will update later
+        solves = Solve.objects.filter(
+            user=user, challenge__competition=None).order_by('-created_date')
         res = []
 
         for solve in solves:

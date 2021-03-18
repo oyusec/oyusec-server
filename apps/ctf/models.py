@@ -41,6 +41,7 @@ class Challenge(BaseModel):
         return f"{self.name} | {self.category} | {self.uuid}"
 
     @classmethod
+
     def attempt(cls, challenge, request):
         data = request.data
         submission = data['submission'].strip()

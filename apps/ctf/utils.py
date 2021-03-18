@@ -44,7 +44,7 @@ def get_standings():
 
 
 def get_score(user):
-    result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE).aggregate(
+    result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=None).aggregate(
         Sum('challenge__value'))['challenge__value__sum']
 
     if not result:
