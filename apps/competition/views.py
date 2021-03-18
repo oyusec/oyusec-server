@@ -47,7 +47,8 @@ class Competitions(BaseView):
                 'id': _.uuid,
                 'photo': _.photo,
                 'slug': _.slug,
-
+                'start_date': convert_to_localtime(_.start_date),
+                'end_date': convert_to_localtime(_.end_date),
             })
 
         return result
@@ -78,7 +79,7 @@ class CompetitionView(BaseView):
         if competition.status == COMPETITION_UPCOMING:
             result['time_left'] = get_timeleft(competition.start_date)
             return result
-        
+
         for challenge in Challenge.objects.filter(competition=competition):
             result['challenges'].append({
                 'name': challenge.name,

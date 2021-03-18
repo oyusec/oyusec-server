@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+from django.utils.timezone import make_aware
+from datetime import datetime
 from apps.core.models import BaseUser
 from apps.ctf.models import (
     StandardChallenge,
@@ -9,6 +10,7 @@ from apps.competition.models import (
     Competition,
 )
 from apps.ctf.consts import *
+from apps.competition.consts import *
 
 
 class Command(BaseCommand):
@@ -28,11 +30,33 @@ class Command(BaseCommand):
         self.stdout.write("[+] Created admin")
 
     def create_competitions(self):
+
+        Competition.objects.create(
+            name='OyuSec CTF #5',
+            description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
+            rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
+            prize="""- $XXX\n- $YYY\n- $ZZZ""",
+            start_date=make_aware(datetime(2021, 3, 27, 18, 0)),
+            end_date=make_aware(datetime(2021, 3, 28, 18, 0)),
+        )
+        Competition.objects.create(
+            name='OyuSec CTF #2',
+            description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
+            rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
+            prize="""- $XXX\n- $YYY\n- $ZZZ""",
+            status=COMPETITION_LIVE,
+            start_date=make_aware(datetime(2021, 3, 15, 18, 0)),
+            end_date=make_aware(datetime(2021, 3, 16, 18, 0)),
+        )
+
         Competition.objects.create(
             name='OyuSec CTF #1',
             description="""For the first time, Taif University organizes an online cybersecurity Capture The Flag (CTF) competition. This competition is a side-event to the 4th National Conference for Computing Colleges (4th NCCC 2021), which is organized by the College of Computers and Information Technology at Taif University from March 27th to March 28th, 2021. The CTF hacking competition starts on the first day of the conference from 03:00 PM to 11:00 PM. \nThe competition will be a Jeopardy Style CTF where every team will have a list of challenges in different categories like Reverse Engineering, Web Security, Digital Forensics, Network Security and others. For every challenge solved, the team will get a certain amount of points depending on the difficulty of the challenge. The team who will get the highest score at the end of the day will be the winning team.""",
             rule="""- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF.""",
             prize="""- $XXX\n- $YYY\n- $ZZZ""",
+            status=COMPETITION_ARCHIVE,
+            start_date=make_aware(datetime(2021, 3, 10, 18, 0)),
+            end_date=make_aware(datetime(2021, 3, 11, 18, 0)),
         )
 
     def create_challenges(self):

@@ -8,15 +8,15 @@ from .consts import *
 
 
 class Competition(BaseModel):
-    name = models.CharField('Name', max_length=100)
-    description = models.TextField('Description')
+    name = models.CharField('Name', max_length=100, default='OyuSec')
+    description = models.TextField('Description', default='CTF')
     status = models.CharField('Status', choices=COMPETITION_STATUS_CHOICES,
                               max_length=100, default=COMPETITION_UPCOMING)
     slug = models.SlugField(null=False, unique=True)
     photo = models.URLField(
         null=True, blank=True, default="https://github.com/OyuTech/Utils/blob/main/oyusec/oyusec.png")
-    rule = models.TextField()
-    prize = models.TextField()
+    rule = models.TextField(default='')
+    prize = models.TextField(default='')
     participants = models.ManyToManyField(
         BaseUser,  through='CompetitionUser')
     location = models.CharField('Location', max_length=100, default='онлайн')
