@@ -1,24 +1,22 @@
+from rest_framework.response import Response
 from apps.api.views import BaseView
-from .consts import (
-    STATE_VISIBLE,
-    STATE_HIDDEN
-)
+from .consts import *
 from .utils import *
 from .models import (
     Challenge
 )
-from rest_framework.response import Response
+from apps.competition.consts import *
 
 
 class ChallengeList(BaseView):
     """
-    Endpoint of challenges accepts only GET request
+    Endpoint of public challenges
     """
 
     def get(self, request):
         user = request.user
         challenges = Challenge.objects.filter(
-            state=STATE_VISIBLE).order_by('value')
+            state=STATE_VISIBLE, competition=None).order_by('value')
         response = self.serialize(challenges, user)
         return Response({'success': True, 'data': response})
 
@@ -34,6 +32,7 @@ class ChallengeList(BaseView):
                 'status': 'unsolved',
                 'state': challenge.state,
                 'category': challenge.category,
+                'competition': False
             })
             # if challenge.category not in ret.keys():
             #     ret[challenge.category] = []
@@ -59,6 +58,16 @@ class ChallengeAttempt(BaseView):
         if not user.is_authenticated:
             return Response({'success': False, 'detail': AUTHENTICATION_REQUIRED})
         challenge = get_chall(challenge_id)
+
+        # Checking challenge from competition or not
+        if challenge.competition:
+            # I hope this will never happen, just in case
+            if challenge.competition.status != COMPETITION_LIVE:
+                return Response({
+                    'success': False,
+                    'detail': 'Тэмцээн эхлээгүй байна'
+                })
+
         status, message = challenge.attempt(challenge, request)
 
         if status:

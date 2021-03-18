@@ -2,12 +2,6 @@ from django.urls import path
 from apps.api.views import (
     IsLive,
 )
-
-from apps.competition.views import (
-    Competitions,
-    CompetitionView,
-)
-
 from apps.core.views import (
     # Admin
     AdminChallengeList,
@@ -43,6 +37,13 @@ from apps.ctf.views import (
     ChallengesSolves,
 )
 
+from apps.competition.views import (
+    Competitions,
+    CompetitionView,
+    CompetitionChallenges,
+    CompetitionChallengesSolves,
+)
+
 urlpatterns = [
     path('challenges/', ChallengeList.as_view()),
     path('challenges/attempt/', ChallengeAttempt.as_view()),
@@ -75,6 +76,9 @@ urlpatterns = [
     # COMPETITION
     path('competitions/', Competitions.as_view()),
     path('competition/<str:slug>/', CompetitionView.as_view()),
+    path('competition/<str:slug>/challenges/', CompetitionChallenges.as_view()),
+    path('competition/<str:slug>/challenges/solves/',
+         CompetitionChallengesSolves.as_view()),
 
     # MISC
     path('live/', IsLive.as_view()),

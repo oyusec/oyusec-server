@@ -16,7 +16,7 @@ def get_enrollment(data):
 def get_status(data):
     if data == COMPETITION_LIVE:
         return 'Шууд'
-    elif data == COMPETITION_UPCOMING:
+    elif data == COMPETITION_COMING:
         return 'Удахгүй'
     elif data == COMPETITION_ARCHIVE:
         return 'Дууссан'

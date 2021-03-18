@@ -12,14 +12,15 @@ from apps.core.models import (
 )
 from apps.core.utils import *
 from apps.ctf.models import (
-    Challenge
+    Challenge,
+    Solve
 )
 from apps.api.views import BaseView
-
 from .models import (
     CompetitionUser,
     Competition,
 )
+from apps.ctf.consts import *
 from .utils import *
 
 from .consts import *
@@ -37,7 +38,7 @@ class Competitions(BaseView):
     def serialize(self):
         result = {
             'live': [],
-            'upcoming': [],
+            'coming': [],
             'archive': []
         }
         for _ in Competition.objects.all():
@@ -63,9 +64,9 @@ class CompetitionView(BaseView):
 
     def serialize(self, competition):
         result = {
-            'challenges': [],
             'name': competition.name,
             'description': competition.description,
+            'slug': competition.slug,
             'photo': competition.photo,
             'rule': competition.rule,
             'prize': competition.prize,
@@ -75,13 +76,25 @@ class CompetitionView(BaseView):
             'end_date': convert_to_localtime(competition.end_date),
             'status': get_status(competition.status),
         }
+        return result
 
-        if competition.status == COMPETITION_UPCOMING:
-            result['time_left'] = get_timeleft(competition.start_date)
-            return result
+
+class CompetitionChallenges(BaseView):
+    def get(self, request, slug):
+        competition = get_object_or_404(Competition, slug=slug)
+        response = self.serialize(competition)
+
+        return Response(response)
+
+    def serialize(self, competition):
+        challenges = []
+        if competition.status == COMPETITION_COMING:
+            return {
+                'success': False
+            }
 
         for challenge in Challenge.objects.filter(competition=competition):
-            result['challenges'].append({
+            challenges.append({
                 'name': challenge.name,
                 'value': challenge.value,
                 'description': challenge.description,
@@ -89,12 +102,36 @@ class CompetitionView(BaseView):
                 'status': 'unsolved',
                 'state': challenge.state,
                 'category': challenge.category,
+                'competition': True
             })
             # if challenge.category not in ret.keys():
             #     ret[challenge.category] = []
 
             # ret[challenge.category].append(data)
-        return result
-        # for challenge
-        # Challenge.objects.filter(competition=competition)
-        # return []
+        return {
+            'success': True,
+            'data': challenges,
+        }
+
+
+class CompetitionChallengesSolves(BaseView):
+    def get(self, request, slug):
+        competition = get_object_or_404(Competition, slug=slug)
+
+        challenges = Challenge.objects.filter(
+            competition=competition,
+            state=STATE_VISIBLE
+        )
+        response = self.serialize(challenges)
+
+        return Response({'success': True, 'data': response})
+
+    def serialize(self, challenges):
+        ret = []
+        for challenge in challenges:
+            solves = Solve.objects.filter(challenge=challenge).count()
+            ret.append({
+                'challengeID': challenge.uuid,
+                'solves': solves
+            })
+        return ret

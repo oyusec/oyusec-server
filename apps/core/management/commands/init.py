@@ -5,6 +5,8 @@ from apps.core.models import BaseUser
 from apps.ctf.models import (
     StandardChallenge,
     DynamicChallenge,
+    Challenge,
+    Flag,
 )
 from apps.competition.models import (
     Competition,
@@ -18,8 +20,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self.create_admin()
-        self.create_challenges()
         self.create_competitions()
+        self.create_challenges()
+        self.create_flags()
 
     def create_admin(self):
         BaseUser.objects.create_superuser(
@@ -38,6 +41,7 @@ class Command(BaseCommand):
             prize="""- $XXX\n- $YYY\n- $ZZZ""",
             start_date=make_aware(datetime(2021, 3, 27, 18, 0)),
             end_date=make_aware(datetime(2021, 3, 28, 18, 0)),
+            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Sudan+National+CTF+Thumbnail.jpg"
         )
         Competition.objects.create(
             name='OyuSec CTF #2',
@@ -47,6 +51,7 @@ class Command(BaseCommand):
             status=COMPETITION_LIVE,
             start_date=make_aware(datetime(2021, 3, 15, 18, 0)),
             end_date=make_aware(datetime(2021, 3, 16, 18, 0)),
+            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Kenya+National+CTF+Thumbnail.jpg",
         )
 
         Competition.objects.create(
@@ -57,30 +62,54 @@ class Command(BaseCommand):
             status=COMPETITION_ARCHIVE,
             start_date=make_aware(datetime(2021, 3, 10, 18, 0)),
             end_date=make_aware(datetime(2021, 3, 11, 18, 0)),
+            photo="https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Saudi+Arabia+National+CTF+Thumbnail.jpg"
         )
 
     def create_challenges(self):
+        compettion1 = Competition.objects.all()[0]
+        compettion2 = Competition.objects.all()[1]
+        compettion3 = Competition.objects.all()[2]
+
         StandardChallenge.objects.create(
             name='Cypher Anxiety',
             category='Forensics',
             description='An image was leaked from a babies store. the manager is so annoyed because he needs to identify the image to fire charges against the responsible employee. the key is the md5 of the image',
+            competition=compettion1,
         )
 
         StandardChallenge.objects.create(
             name='Hidden Message',
             category='Forensics',
             description='A cyber Criminal is hiding information in the below file . capture the flag ? submit Flag in MD5 Format [Link](https://s3-eu-west-1.amazonaws.com/talentchallenges/Forensics/hidden_message.jpg)',
+            competition=compettion2,
         )
 
         DynamicChallenge.objects.create(
             name='Crack the Hash',
             category='Cryptography',
             description='A hacker leaked the below hash online.Can you crack it to know the password of the CEO? > 1ab566b9fa5c0297295743e7c2a6ec27',
+            competition=compettion3,
         )
         DynamicChallenge.objects.create(
             name='Postbase',
             category='Cryptography',
             description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
         )
+        DynamicChallenge.objects.create(
+            name='Postbase 2',
+            category='Cryptography',
+            description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
+        )
+        DynamicChallenge.objects.create(
+            name='Postbase 3',
+            category='Cryptography',
+            description="We got this letters and numbers and don't understand them. Can you? > R[corrupted]BR3tCNDUzXzYxWDdZXzRSfQ==",
+        )
 
         self.stdout.write("[+] Created challenges")
+
+    def create_flags(self):
+        for _ in Challenge.objects.all():
+            Flag.objects.create(content='flag{a}', challenge=_)
+
+        self.stdout.write('[+] Created flags')
