@@ -38,8 +38,9 @@ class Competition(BaseModel):
         return super(Competition, self).save(*args, **kwargs)
 
     @classmethod
-    def calculate_result(cls):
+    def calculate_result(cls, competition):
         print('hello from result')
+        print(competition.status, competition.name)
         # data = request.data
         # submission = data['submission'].strip()
 
@@ -48,7 +49,7 @@ class Competition(BaseModel):
         #     challenge=challenge,
         #     submission=submission
         # ).save()
-    
+
 
 class CompetitionUser(BaseModel):
     user = models.ForeignKey(BaseUser, on_delete=models.CASCADE)

@@ -10,4 +10,4 @@ from .models import (
 def competition_end(sender, instance, created, **kwargs):
     # If competition status becomes archive it means competition overs and we have to calculate result
     if instance.status == COMPETITION_ARCHIVE:
-        instance.calculate_result()
+        instance.calculate_result(instance)
