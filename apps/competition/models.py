@@ -24,6 +24,7 @@ class Competition(BaseModel):
         'Enrollment', max_length=100, default=ENROLLMENT_SOLO, choices=ENROLLMENT_CHOICES)
     start_date = models.DateTimeField(auto_now_add=False, blank=True)
     end_date = models.DateTimeField(auto_now_add=False, blank=True)
+    rating = models.PositiveIntegerField('Rating', default=20)
 
     class Meta:
         verbose_name = 'Competition'
@@ -36,6 +37,18 @@ class Competition(BaseModel):
             self.slug = slugify(self.name)
         return super(Competition, self).save(*args, **kwargs)
 
+    @classmethod
+    def calculate_result(cls):
+        print('hello from result')
+        # data = request.data
+        # submission = data['submission'].strip()
+
+        # Solve.objects.create(
+        #     user=user,
+        #     challenge=challenge,
+        #     submission=submission
+        # ).save()
+    
 
 class CompetitionUser(BaseModel):
     user = models.ForeignKey(BaseUser, on_delete=models.CASCADE)

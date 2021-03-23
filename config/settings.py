@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     # Custom apps
     'apps.core.apps.CoreConfig',
     'apps.ctf.apps.CtfConfig',
-    'apps.competition',
+    'apps.competition.apps.CompetitionConfig',
     'apps.api',
 ]
 

@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 
 class CompetitionConfig(AppConfig):
-    name = 'competition'
+    name = 'apps.competition'
+
+    def ready(self):
+        import apps.competition.signals

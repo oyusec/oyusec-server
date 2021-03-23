@@ -71,6 +71,7 @@ class CompetitionView(BaseView):
             'rule': competition.rule,
             'prize': competition.prize,
             'location': competition.location,
+            'rating': competition.rating,
             'enrollment': get_enrollment(competition.enrollment),
             'start_date': convert_to_localtime(competition.start_date),
             'end_date': convert_to_localtime(competition.end_date),
