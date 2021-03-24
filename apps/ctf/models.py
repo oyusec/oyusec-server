@@ -4,9 +4,6 @@ from apps.core.models import (
     BaseUserProfile,
     BaseUser,
 )
-from apps.competition.models import (
-    Competition
-)
 
 from math import ceil
 from datetime import datetime, timedelta
@@ -32,7 +29,7 @@ class Challenge(BaseModel):
         "State", choices=STATE_CHOICES, max_length=100, default=STATE_VISIBLE)
     max_attempts = models.PositiveIntegerField("Max attempts", default=0)
     competition = models.ForeignKey(
-        Competition,  on_delete=models.CASCADE, null=True, blank=True)
+        'competition.Competition',  on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Challenge"
@@ -41,7 +38,6 @@ class Challenge(BaseModel):
         return f"{self.name} | {self.category} | {self.uuid}"
 
     @classmethod
-
     def attempt(cls, challenge, request):
         data = request.data
         submission = data['submission'].strip()
@@ -176,6 +172,15 @@ class Solve(Submission):
 
     def __str__(self):
         return f"{self.user.username} | {self.challenge.name}"
+
+    @classmethod
+    def get_score(cls, user, competition):
+        result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).aggregate(
+            models.Sum('challenge__value'))['challenge__value__sum']
+
+        if not result:
+            result = 0
+        return result
 
 
 class Hint(BaseModel):

@@ -17,6 +17,9 @@ from apps.ctf.models import (
     Flag,
     Tag,
 )
+from apps.competition.models import (
+    CompetitionUser
+)
 from apps.ctf.utils import *
 from .serializers import AuthLoginSerializer
 from .models import (
@@ -556,7 +559,7 @@ class UserProfileSolves(BaseView):
         # Returning only public challenges
         # Will update later
         solves = Solve.objects.filter(
-            user=user, challenge__competition=None).order_by('-created_date')
+            user=user, challenge__competition=None, challenge__state=STATE_VISIBLE).order_by('-created_date')
         res = []
 
         for solve in solves:
@@ -568,3 +571,15 @@ class UserProfileSolves(BaseView):
             })
 
         return res
+
+
+class UserCompetitionHistory(BaseView):
+    def get(self, request, slug):
+        user = get_object_or_404(BaseUser, slug=slug)
+
+        response = CompetitionUser.get_history(user=user)
+
+        return Response({
+            'success': True,
+            'data': response
+        })

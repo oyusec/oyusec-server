@@ -64,6 +64,7 @@ class ChallengeAttempt(BaseView):
         challenge = get_chall(challenge_id)
 
         # Checking challenge from competition or not
+        
         if challenge.competition:
             # I hope this will never happen, just in case
             if challenge.competition.status != COMPETITION_LIVE:
@@ -71,23 +72,30 @@ class ChallengeAttempt(BaseView):
                     'success': False,
                     'detail': 'Тэмцээн эхлээгүй байна'
                 })
+            
+            status, message = challenge.attempt(challenge, request)
 
-            # If user submit flag, then we register user as participant
-            compUser = CompetitionUser.objects.filter(
-                user=user, competition=challenge.competition)
+            # If user submit flag and it's correct, then we register user as participant
+            if status:
+                compUser = CompetitionUser.objects.filter(
+                    user=user, competition=challenge.competition)
 
-            if not compUser:
-                compUser = CompetitionUser.objects.create(
-                    user=user,
-                    competition=challenge.competition,
+                if not compUser:
+                    compUser = CompetitionUser.objects.create(
+                        user=user,
+                        competition=challenge.competition,
+                    )
+                
+                challenge.solve(
+                    user=user, challenge=challenge, request=request
                 )
 
-        status, message = challenge.attempt(challenge, request)
-
-        if status:
-            challenge.solve(
-                user=user, challenge=challenge, request=request
-            )
+        else:
+            status, message = challenge.attempt(challenge, request)
+            if status:
+                challenge.solve(
+                    user=user, challenge=challenge, request=request
+                )
 
         return Response({
             "success": True,

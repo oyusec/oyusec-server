@@ -32,8 +32,8 @@ FAKE_COMPETITION_DESCRIPTION = """For the first time, Taif University organizes 
 FAKE_COMPETITION_RULE = """- Sharing the flags between different teams is prohibited.\n- Brute Force attacks on the challenges submission portal or challenges links are not allowed.\n- Any attack against the site or the hosted servers will be observed and the player will be banned from participating in the CTF immediately.\n- Organizers have the permission to disqualify teams for any unethical behavior or any trials to interrupt the CTF."""
 FAKE_COMPETITION_PRIZE = """- $XXX\n- $YYY\n- $ZZZ"""
 FAKE_COMPETITION_CHALLENGE_NAME = 'Hidden Message'
-FAKE_IMAGES = ["https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Sudan+National+CTF+Thumbnail.jpg",
-               "https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Kenya+National+CTF+Thumbnail.jpg", "https://website-cybertalents.s3-us-west-2.amazonaws.com/Competitions/Saudi+Arabia+National+CTF+Thumbnail.jpg"]
+FAKE_IMAGES = [
+    'https://raw.githubusercontent.com/oyusec/OyuSec-CTF/master/public/img/thumbnail-oyusec-contest-1.png']
 FAKE_STATUS = [COMPETITION_LIVE, COMPETITION_ARCHIVE, COMPETITION_COMING]
 FAKE_COMPETITION_LOCATIONS = ['онлайн', 'дэлхийд', 'монголд', 'хөдөө']
 

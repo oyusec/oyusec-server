@@ -4,7 +4,11 @@ from apps.core.models import (
     BaseModel,
     BaseUser,
 )
+from apps.ctf.models import (
+    Solve
+)
 from .consts import *
+from operator import itemgetter
 
 
 class Competition(BaseModel):
@@ -24,7 +28,7 @@ class Competition(BaseModel):
         'Enrollment', max_length=100, default=ENROLLMENT_SOLO, choices=ENROLLMENT_CHOICES)
     start_date = models.DateTimeField(auto_now_add=False, blank=True)
     end_date = models.DateTimeField(auto_now_add=False, blank=True)
-    rating = models.PositiveIntegerField('Rating', default=20)
+    weight = models.FloatField('Weight', default=20.0)
 
     class Meta:
         verbose_name = 'Competition'
@@ -39,25 +43,52 @@ class Competition(BaseModel):
 
     @classmethod
     def calculate_result(cls, competition):
-        print('hello from result')
-        print(competition.status, competition.name)
-        # data = request.data
-        # submission = data['submission'].strip()
+        participants = CompetitionUser.objects.filter(competition=competition)
+        users = []
 
-        # Solve.objects.create(
-        #     user=user,
-        #     challenge=challenge,
-        #     submission=submission
-        # ).save()
+        for participant in participants:
+            users.append({'user': participant, 'score': Solve.get_score(
+                competition=competition, user=participant.user)})
+        users = sorted(users, key=itemgetter('score'), reverse=True)
+        total = len(users)
+        # If zero participant
+        if total <= 0:
+            return
+        max_score = users[0]['score']
+
+        for _ in range(total):
+            point = users[_]['score'] / max_score
+            place = 1 / (_ + 1)
+            rating = ((point + place) * competition.weight) / \
+                (1 / (1 + _ // total))
+            users[_]['user'].score = users[_]['score']
+            users[_]['user'].rating = rating
+            users[_]['user'].place = _ + 1
+            users[_]['user'].save()
 
 
 class CompetitionUser(BaseModel):
     user = models.ForeignKey(BaseUser, on_delete=models.CASCADE)
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
-    score = models.PositiveIntegerField('Score', default=0)
+    score = models.PositiveIntegerField('Score', default=0.0)
+    rating = models.FloatField('Rating', default=0.0)
+    place = models.PositiveIntegerField('Place', default=0)
 
     class Meta:
         verbose_name = 'Competition User'
 
     def __str__(self):
         return f'{self.user.username} | {self.competition.name}'
+
+    @classmethod
+    def get_history(cls, user):
+        res = []
+        for comp in CompetitionUser.objects.filter(user=user, competition__status=COMPETITION_ARCHIVE).order_by('-created_date'):
+            res.append({
+                'name': comp.competition.name,
+                'place': comp.place,
+                'rating': round(comp.rating, 2),
+                'score': round(comp.score, 2),
+            })
+
+        return res

@@ -25,6 +25,7 @@ from apps.core.views import (
     UserSolves,
     UserProfile,
     UserProfileSolves,
+    UserCompetitionHistory,
 )
 
 from apps.ctf.views import (
@@ -62,6 +63,7 @@ urlpatterns = [
     path('user/me/', UserInfo.as_view()),
     path('user/solves/', UserSolves.as_view()),
     path('user/solves/<slug:slug>/', UserProfileSolves.as_view()),
+    path('user/competition/<slug:slug>/', UserCompetitionHistory.as_view()),
     path('user/profile/<slug:slug>/', UserProfile.as_view()),
 
     # ADMIN

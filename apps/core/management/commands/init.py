@@ -32,6 +32,9 @@ class Command(BaseCommand):
         self.create_flags()
         self.create_solves()
 
+        # Misc
+        self.end_comps()
+
     def create_admin(self):
         BaseUser.objects.create_superuser(
             username=FAKE_ADMIN,
@@ -49,7 +52,7 @@ class Command(BaseCommand):
         user.set_password(FAKE_PASSWORD)
         user.save()
 
-        for _ in range(20):
+        for _ in range(30):
             user = BaseUser.objects.create(
                 username=f'{FAKE_USER_USERNAME}{_}',
                 email=f'{FAKE_USER_USERNAME}{_}@zxc.zxc',
@@ -64,24 +67,24 @@ class Command(BaseCommand):
         for _ in range(10):
             rand_date = random.randint(1, 29)
             rand_hour = random.randint(0, 23)
-            rand_img = random.choice(FAKE_IMAGES)
-            rand_status = random.choice(FAKE_STATUS)
-            rand_location = random.choice(FAKE_COMPETITION_LOCATIONS)
 
             Competition.objects.create(
                 name=f'{FAKE_COMPETITION_NAME} #{_}',
                 description=FAKE_COMPETITION_DESCRIPTION,
                 prize=FAKE_COMPETITION_PRIZE,
                 rule=FAKE_COMPETITION_RULE,
-                location=rand_location,
+                location=random.choice(FAKE_COMPETITION_LOCATIONS),
                 enrollment=random.choice([ENROLLMENT_SOLO, ENROLLMENT_TEAM]),
                 start_date=make_aware(
                     datetime(2021, 3, rand_date, rand_hour, 0)),
                 end_date=make_aware(
                     datetime(2021, 3, rand_date + 1, rand_hour, 0)),
-                photo=rand_img,
-                status=rand_status,
+                photo=random.choice(FAKE_IMAGES),
+                status=random.choice(FAKE_STATUS),
+                weight=random.randint(20, 60)
             )
+
+        self.stdout.write("[+] Created competitions")
 
     def create_challenges(self):
 
@@ -99,6 +102,7 @@ class Command(BaseCommand):
                 category=random.choice(FAKE_CHALLENGE_CATEGORIES),
                 description=FAKE_CHALLENGE_DESCRIPTION,
                 competition=random.choice(Competition.objects.all()),
+                decay=random.randint(20, 50)
             )
 
         self.stdout.write("[+] Created challenges")
@@ -118,22 +122,31 @@ class Command(BaseCommand):
             challenges_id = list(Challenge.objects.filter(
                 state=STATE_VISIBLE).values_list('uuid', flat=True))
             solves_challenges = random.sample(
-                challenges_id, min(len(challenges_id), 5))
+                challenges_id, min(len(challenges_id), random.randint(1, 30)))
+
             challenges = Challenge.objects.filter(uuid__in=solves_challenges)
 
             for challenge in challenges:
+                if challenge.competition:
+                    if challenge.competition.status == COMPETITION_COMING:
+                        continue
+                    CompetitionUser.objects.get_or_create(
+                        user=user, competition=challenge.competition)
+
                 Solve.objects.create(
                     user=user,
                     challenge=challenge,
                     submission=FAKE_FLAG
                 )
-                if challenge.competition:
-                    CompetitionUser.objects.create(
-                        user=user,
-                        competition=challenge.competition
-                    )
 
         self.stdout.write('[+] Calculating dynamic values')
 
         for challenge in DynamicChallenge.objects.filter(state=STATE_VISIBLE):
             challenge.calculate_value(challenge)
+
+    def end_comps(self):
+
+        for competition in Competition.objects.filter(status=COMPETITION_ARCHIVE):
+            competition.calculate_result(competition=competition)
+
+        self.stdout.write('[+] Calculated competition_result')
