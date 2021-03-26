@@ -89,7 +89,7 @@ class BaseUser(AbstractUser, BaseModel):
         verbose_name = "User"
 
     def __str__(self):
-        return f'{self.username} | {self.email} | {self.uuid}'
+        return f'{self.username} | {self.email} | {self.user_type}'
 
     def save(self, *args, **kwargs):
         if not self.slug:

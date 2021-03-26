@@ -28,7 +28,7 @@ class Challenge(BaseModel):
         verbose_name = "Challenge"
 
     def __str__(self):
-        return f"{self.name} | {self.category} | {self.uuid}"
+        return f"{self.name} | {self.category} | {self.competition}"
 
     @classmethod
     def attempt(cls, challenge, request):
