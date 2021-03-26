@@ -12,13 +12,6 @@ from .consts import *
 
 
 class Challenge(BaseModel):
-    flags = models.ForeignKey(
-        'Flag', verbose_name="Flag", related_name="challenge_flag", on_delete=models.CASCADE, null=True, blank=True)
-    tags = models.ForeignKey('Tag', related_name="challenge_tag",
-                             on_delete=models.CASCADE, null=True, blank=True)
-    hints = models.ForeignKey(
-        'Hint', related_name="challenge_hint", on_delete=models.CASCADE, null=True, blank=True)
-
     name = models.CharField("Name", max_length=30, unique=True)
     description = models.TextField("Description")
     value = models.PositiveIntegerField("Value", default=1000, null=True)
