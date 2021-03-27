@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from rest_framework.response import Response
 from apps.api.views import BaseView
 from .consts import *
@@ -10,6 +11,7 @@ from apps.competition.models import (
     Competition,
     CompetitionUser
 )
+from apps.core.utils import convert_to_localtime, td_format
 
 
 class ChallengeList(BaseView):
@@ -111,6 +113,40 @@ class ChallengeAttempt(BaseView):
             "status": "correct" if status else "incorrect",
             "detail": message
         })
+
+
+class ChallengeSolves(BaseView):
+    def get(self, request, uuid):
+        try:
+            challenge = Challenge.objects.get(uuid=uuid)
+        except:
+            return Response({
+                'success': False,
+                'detail': NOT_FOUND
+            })
+        if challenge.state == STATE_HIDDEN:
+            return Response({
+                'success': False,
+                'detail': NOT_FOUND
+            })
+
+        response = self.serialize(challenge)
+
+        return Response({
+            'success': True,
+            'data': response
+        })
+
+    def serialize(self, challenge):
+        ret = []
+        for solve in Solve.objects.filter(challenge=challenge).order_by('-created_date'):
+            ret.append({
+                'slug': solve.user.slug,
+                'username': solve.user.username,
+                'time': td_format(datetime.now(timezone.utc) - solve.created_date),
+            })
+
+        return ret
 
 
 class ChallengesSolves(BaseView):

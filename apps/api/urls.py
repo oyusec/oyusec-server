@@ -34,7 +34,7 @@ from apps.ctf.views import (
     ChallengeAttempt,
     Scoreboard,
 
-    # ChallengeSolves,
+    ChallengeSolves,
     ChallengesSolves,
 )
 
@@ -47,9 +47,9 @@ from apps.competition.views import (
 )
 
 urlpatterns = [
+    path('challenge/<str:uuid>/solves/', ChallengeSolves.as_view()),
     path('challenges/', ChallengeList.as_view()),
     path('challenges/attempt/', ChallengeAttempt.as_view()),
-    # path('challenges/<slug:uuid>/solves/', ChallengeSolves.as_view()),
     path('challenges/solves/', ChallengesSolves.as_view()),
 
     # AUTHENTICATION
