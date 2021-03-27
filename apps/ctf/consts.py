@@ -35,6 +35,9 @@ COMPETITION_CHOICES = (
     (COMPETITION_STATE_END, "end")
 )
 
+ALREADY_SOLVED = 'Та бодсон байна'
+NOT_SOLVED = 'Та бодоогүй байна'
+
 # Mongolian
 
 STATE_VISIBLE_MN = "Ил харагдана"

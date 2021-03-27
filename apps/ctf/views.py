@@ -63,8 +63,17 @@ class ChallengeAttempt(BaseView):
             return Response({'success': False, 'detail': AUTHENTICATION_REQUIRED})
         challenge = get_chall(challenge_id)
 
+        # Checking user can submit flag or not
+        status, message = challenge.check_valid(
+            user=user, challenge=challenge, request=request)
+
+        if not status:
+            return Response({
+                'success': False,
+                'detail': message
+            })
+
         # Checking challenge from competition or not
-        
         if challenge.competition:
             # I hope this will never happen, just in case
             if challenge.competition.status != COMPETITION_LIVE:
@@ -72,7 +81,7 @@ class ChallengeAttempt(BaseView):
                     'success': False,
                     'detail': 'Тэмцээн эхлээгүй байна'
                 })
-            
+
             status, message = challenge.attempt(challenge, request)
 
             # If user submit flag and it's correct, then we register user as participant
@@ -85,7 +94,7 @@ class ChallengeAttempt(BaseView):
                         user=user,
                         competition=challenge.competition,
                     )
-                
+
                 challenge.solve(
                     user=user, challenge=challenge, request=request
                 )

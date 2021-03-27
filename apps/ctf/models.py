@@ -31,6 +31,12 @@ class Challenge(BaseModel):
         return f"{self.name} | {self.category} | {self.competition}"
 
     @classmethod
+    def check_valid(cls, user, challenge, request):
+        if Solve.objects.filter(user=user, challenge=challenge).exists():
+            return False, ALREADY_SOLVED
+        return True, NOT_SOLVED
+
+    @classmethod
     def attempt(cls, challenge, request):
         data = request.data
         submission = data['submission'].strip()
