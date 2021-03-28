@@ -94,7 +94,7 @@ class CompetitionChallenges(BaseView):
                 'success': False
             }
 
-        for challenge in Challenge.objects.filter(competition=competition):
+        for challenge in Challenge.objects.filter(competition=competition, state__contains=STATE_VISIBLE):
             challenges.append({
                 'name': challenge.name,
                 'value': challenge.value,

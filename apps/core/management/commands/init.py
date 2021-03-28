@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils.timezone import make_aware
 from datetime import datetime
-from apps.core.models import BaseUser
+from apps.core.models import BaseUser, BaseUserProfile
 from apps.ctf.models import (
     StandardChallenge,
     DynamicChallenge,
@@ -132,6 +132,14 @@ class Command(BaseCommand):
                         continue
                     CompetitionUser.objects.get_or_create(
                         user=user, competition=challenge.competition)
+                
+                solve_count = Solve.objects.filter(challenge=challenge).count()
+                
+                if solve_count == 0:
+                    profile = BaseUserProfile.objects.get(user=user)
+                    profile.fblood += 1
+                    profile.save()
+
 
                 Solve.objects.create(
                     user=user,

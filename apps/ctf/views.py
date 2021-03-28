@@ -172,5 +172,54 @@ class ChallengesSolves(BaseView):
 class Scoreboard(BaseView):
 
     def get(self, request):
-        standings = get_standings()
-        return Response({'success': True, 'data': standings})
+        response = self.serialize()
+
+        return Response({'success': True, 'data': response})
+    
+    def serialize(self):
+        res = []
+
+        total_value = get_visible_challenges_value()
+
+        for user in BaseUser.objects.filter(user_type=USER_TYPE_NORMAL):
+            profile = BaseUserProfile.objects.get(user=user)
+            total_score, total_solved_challs = self.get_public_challs(user=user)
+            total_rating, total_win = self.get_contest_rating(user=user)
+
+            if not total_score:
+                total_score = 0
+            
+            if not total_score > 0:
+                continue
+            try:
+                progress = int(total_score / total_value * 100)
+            except Exception as e:
+                progress = 0
+            res.append({
+                'username': user.username,
+                'score': total_score,
+                'fblood': profile.fblood,
+                'total_solved_challs': total_solved_challs,
+                'total_win': total_win,
+                'total_rating': total_rating,
+                'progress': progress,
+            })
+        
+        return sorted(res, key=itemgetter('score'), reverse=True)
+    
+    def get_public_challs(self, user):
+        solved_challs = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=None)
+        total_score = solved_challs.aggregate(models.Sum('challenge__value'))['challenge__value__sum']
+        total_solved_challs = solved_challs.count()
+
+        if not total_solved_challs:
+            total_solved_challs = 0
+        return total_score, total_solved_challs
+
+    def get_contest_rating(self, user):
+        total_rating, total_win = 0, 0
+        for compUser in CompetitionUser.objects.filter(user=user, competition__status__contains=COMPETITION_ARCHIVE):
+            total_rating += compUser.rating
+            total_win += 1 if compUser.place == 1 else 0
+        
+        return round(total_rating, 2), total_win

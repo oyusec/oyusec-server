@@ -30,19 +30,6 @@ def get_type(data):
         return TYPE_STANDARD_MN
 
 
-def get_standings():
-    res = []
-    for user in BaseUser.objects.filter(user_type=USER_TYPE_NORMAL):
-        score = get_score(user)
-        if not score:
-            score = 0
-        res.append({
-            'username': user.username,
-            'score': score
-        })
-    return sorted(res, key=itemgetter('score'), reverse=True)
-
-
 def get_score(user):
     result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=None).aggregate(
         Sum('challenge__value'))['challenge__value__sum']
@@ -60,7 +47,7 @@ def get_chall(challenge_id):
 
 
 def get_visible_challenges_value():
-    result = Challenge.objects.filter(state=STATE_VISIBLE).aggregate(
+    result = Challenge.objects.filter(state=STATE_VISIBLE, competition=None).aggregate(
         Sum('value'))['value__sum']
 
     if not result:

@@ -92,3 +92,5 @@ class CompetitionUser(BaseModel):
             })
 
         return res
+
+

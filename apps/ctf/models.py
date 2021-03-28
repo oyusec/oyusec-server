@@ -56,6 +56,12 @@ class Challenge(BaseModel):
     def solve(cls, user, challenge, request):
         data = request.data
         submission = data['submission'].strip()
+        solve_count = Solve.objects.filter(challenge=challenge).count()
+
+        if solve_count == 0:
+            profile = BaseUserProfile.objects.get(user=user)
+            profile.fblood += 1
+            profile.save()
 
         Solve.objects.create(
             user=user,
@@ -181,6 +187,10 @@ class Solve(Submission):
             result = 0
         return result
 
+    @classmethod
+    def get_total_solved(cls, user, competition=None):
+        result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).count()
+        return result 
 
 class Hint(BaseModel):
     REQUIRED_FIELDS = ['challenge']

@@ -13,7 +13,6 @@ def convert_to_localtime(utctime):
 
     fmt = '%Y-%m-%d, %H:%M'
 
-    print(utctime)
     utc = utctime.replace(tzinfo=pytz.UTC)
     localtz = utc.astimezone(timezone.get_current_timezone())
     return localtz.strftime(fmt)
