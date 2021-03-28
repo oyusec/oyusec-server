@@ -11,7 +11,7 @@ def is_admin(request):
 
 def convert_to_localtime(utctime):
 
-    fmt = '%Y-%m-%d, %H:%M'
+    fmt = '%Y-%m-%d %H:%M'
 
     utc = utctime.replace(tzinfo=pytz.UTC)
     localtz = utc.astimezone(timezone.get_current_timezone())
