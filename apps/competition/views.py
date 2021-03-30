@@ -96,6 +96,10 @@ class CompetitionChallenges(BaseView):
 
         for challenge in Challenge.objects.filter(competition=competition, state__contains=STATE_VISIBLE):
             challenges.append({
+                'author': {
+                    'username': challenge.user.username,
+                    'slug': challenge.user.slug,
+                },
                 'name': challenge.name,
                 'value': challenge.value,
                 'description': challenge.description,

@@ -1,11 +1,13 @@
 from apps.competition.consts import *
 
-AUTHENTICATION_REQUIRED = "Authentication required"
-ACCESS_DENIED = "You dont have access to this resource"
+AUTHENTICATION_REQUIRED = "Та эхлээд нэвтэрнэ үү"
+ACCESS_DENIED = "Таны эрх хүрэхгүй байна"
 
 SUCCESS_UPDATED = "Амжилттай шинэчлэлээ"
 SUCCESS_ADD = "Амжилттай нэмэгдлээ"
 SUCCESS_DELETED = "Амжилттай хасагдлаа"
+
+SOMETHING_WRONG = 'Алдаа гарлаа'
 
 USER_TYPE_NORMAL = "normal"
 USER_TYPE_ADMIN = "admin"
@@ -39,6 +41,7 @@ FAKE_COMPETITION_LOCATIONS = ['онлайн', 'дэлхийд', 'монголд'
 
 # Mostly related challenges
 FAKE_CHALLENGE_NAME = 'Cyber Anxiety'
+FAKE_REQCHALLENGE_NAME = 'Will add'
 FAKE_CHALLENGE_CATEGORIES = ['reverse engineering', 'misc',
                              'forensics', 'cryptography', 'binary exploitation', 'web']
 FAKE_CHALLENGE_DESCRIPTION = """RSA encryption is modular exponentiation of a message with an exponent `e` and a modulus `N` which is normally a product of two primes: `N = p * q`.
@@ -49,5 +52,6 @@ Together the exponent and modulus form an RSA "public key" `(N, e)`. The most co
 
 [download](https://google.com)
 """
+FAKE_SOLUTION = 'Use strings'
 
 FAKE_FLAG = 'flag{thisisdemo}'

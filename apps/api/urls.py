@@ -32,6 +32,8 @@ from apps.ctf.views import (
     # App
     ChallengeList,
     ChallengeAttempt,
+    ChallengeRequest,
+
     Scoreboard,
 
     ChallengeSolves,
@@ -51,6 +53,7 @@ urlpatterns = [
     path('challenges/', ChallengeList.as_view()),
     path('challenges/attempt/', ChallengeAttempt.as_view()),
     path('challenges/solves/', ChallengesSolves.as_view()),
+    path('challenges/request/', ChallengeRequest.as_view()),
 
     # AUTHENTICATION
     path('auth/register/', AuthRegister.as_view()),

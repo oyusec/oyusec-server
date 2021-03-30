@@ -35,6 +35,7 @@ COMPETITION_CHOICES = (
     (COMPETITION_STATE_END, "end")
 )
 
+AUTHOR_CHALLENGE = 'Та энэ бодлогыг нэмсэн байна'
 ALREADY_SOLVED = 'Та бодсон байна'
 NOT_SOLVED = 'Та бодоогүй байна'
 NOT_FOUND = 'Олдсонгүй'

@@ -104,8 +104,6 @@ class BaseUserProfile(BaseModel):
 
     fullname = models.CharField(
         "Fullname", max_length=20, null=True, blank=True)
-    
-    fblood = models.PositiveIntegerField('First blood', default=0)
 
     class Meta:
         verbose_name = 'Profile'

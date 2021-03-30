@@ -11,10 +11,18 @@ from django.utils import timezone
 from .consts import *
 
 
+def get_admin():
+    return BaseUser.objects.filter(username='admin').first()
+
+
 class Challenge(BaseModel):
+    REQUIRED_FIELDS = ['base_user']
+
     name = models.CharField("Name", max_length=30, unique=True)
     description = models.TextField("Description")
     value = models.PositiveIntegerField("Value", default=1000, null=True)
+    user = models.ForeignKey(
+        BaseUser, verbose_name='Author', on_delete=models.CASCADE, null=True, default=get_admin)
 
     category = models.CharField(
         "Category", max_length=100, null=True)
@@ -23,6 +31,7 @@ class Challenge(BaseModel):
     max_attempts = models.PositiveIntegerField("Max attempts", default=0)
     competition = models.ForeignKey(
         'competition.Competition',  on_delete=models.CASCADE, null=True, blank=True)
+    solution = models.TextField("Solution", default='')
 
     class Meta:
         verbose_name = "Challenge"
@@ -32,11 +41,13 @@ class Challenge(BaseModel):
 
     @classmethod
     def check_valid(cls, user, challenge, request):
+        if challenge.user.username == user.username:
+            return False, AUTHOR_CHALLENGE
         if Solve.objects.filter(user=user, challenge=challenge).exists():
             return False, ALREADY_SOLVED
         return True, NOT_SOLVED
 
-    @classmethod
+    @ classmethod
     def attempt(cls, challenge, request):
         data = request.data
         submission = data['submission'].strip()
@@ -52,22 +63,16 @@ class Challenge(BaseModel):
         # So returning false
         return False, SUBMISSION_WRONG_MN
 
-    @classmethod
+    @ classmethod
     def solve(cls, user, challenge, request):
         data = request.data
         submission = data['submission'].strip()
-        solve_count = Solve.objects.filter(challenge=challenge).count()
-
-        if solve_count == 0:
-            profile = BaseUserProfile.objects.get(user=user)
-            profile.fblood += 1
-            profile.save()
 
         Solve.objects.create(
             user=user,
             challenge=challenge,
             submission=submission
-        ).save()
+        )
 
 
 class DynamicChallenge(Challenge):
@@ -78,13 +83,13 @@ class DynamicChallenge(Challenge):
     decay = models.PositiveIntegerField("Decay", default=25, null=True)
 
     class Meta:
-        verbose_name = 'DynamicChallenge'
+        verbose_name = 'Dynamic challenge'
 
     def save(self, *args, **kwargs):
         self.initial = self.value
         return super(DynamicChallenge, self).save(*args, **kwargs)
 
-    @classmethod
+    @ classmethod
     def calculate_value(cls, challenge):
         solve_count = Solve.objects.filter(challenge=challenge).count()
 
@@ -103,7 +108,7 @@ class DynamicChallenge(Challenge):
         challenge.value = value
         challenge.save()
 
-    @classmethod
+    @ classmethod
     def solve(cls, user, challenge, request):
         super().solve(user, challenge, request)
 
@@ -113,7 +118,7 @@ class DynamicChallenge(Challenge):
 class StandardChallenge(Challenge):
 
     class Meta:
-        verbose_name = 'StandardChallenge'
+        verbose_name = 'Standard challenge'
 
 
 class Flag(BaseModel):
@@ -128,7 +133,7 @@ class Flag(BaseModel):
         return f"Flag: {self.content} for {self.challenge.name}"
 
     # From CTFd
-    @staticmethod
+    @ staticmethod
     def compare(flag, provided):
         flag = flag.content
 
@@ -178,7 +183,7 @@ class Solve(Submission):
     def __str__(self):
         return f"{self.user.username} | {self.challenge.name}"
 
-    @classmethod
+    @ classmethod
     def get_score(cls, user, competition):
         result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).aggregate(
             models.Sum('challenge__value'))['challenge__value__sum']
@@ -187,10 +192,12 @@ class Solve(Submission):
             result = 0
         return result
 
-    @classmethod
+    @ classmethod
     def get_total_solved(cls, user, competition=None):
-        result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).count()
-        return result 
+        result = Solve.objects.filter(
+            user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).count()
+        return result
+
 
 class Hint(BaseModel):
     REQUIRED_FIELDS = ['challenge']
@@ -200,7 +207,6 @@ class Hint(BaseModel):
     content = models.CharField("Зөвлөгөө", max_length=100)
     state = models.CharField("State", choices=STATE_CHOICES,
                              max_length=100, default=STATE_VISIBLE)
-
     cost = models.PositiveIntegerField("Cost", default=0)
 
     class Meta:
@@ -208,14 +214,3 @@ class Hint(BaseModel):
 
     def __str__(self):
         return f'{self.challenge.name} | {self.content}'
-
-
-class Config(BaseModel):
-    key = models.CharField(max_length=200, db_index=True)
-    value = models.CharField(max_length=200, db_index=True)
-
-    class Meta:
-        verbose_name = 'Config'
-
-    def __str__(self):
-        return f'{self.key} | {self.value}'

@@ -516,11 +516,9 @@ class UserProfile(BaseView):
             'slug': user.slug,
             'photo': user.photo,
             'fullname': profile.fullname,
+            'progress': calculate_percentage(score, value)
         }
-        try:
-            res['progress'] = int(score / value * 100)
-        except Exception as e:
-            res['progress'] = 0
+
         return res
 
 

@@ -31,6 +31,8 @@ class Command(BaseCommand):
         self.create_challenges()
         self.create_flags()
         self.create_solves()
+        self.create_requests()
+        self.accept_requests()
 
         # Misc
         self.end_comps()
@@ -132,14 +134,6 @@ class Command(BaseCommand):
                         continue
                     CompetitionUser.objects.get_or_create(
                         user=user, competition=challenge.competition)
-                
-                solve_count = Solve.objects.filter(challenge=challenge).count()
-                
-                if solve_count == 0:
-                    profile = BaseUserProfile.objects.get(user=user)
-                    profile.fblood += 1
-                    profile.save()
-
 
                 Solve.objects.create(
                     user=user,
@@ -151,6 +145,34 @@ class Command(BaseCommand):
 
         for challenge in DynamicChallenge.objects.filter(state=STATE_VISIBLE):
             challenge.calculate_value(challenge)
+
+    def create_requests(self):
+        ind = 1
+
+        for user in BaseUser.objects.filter(user_type=USER_TYPE_NORMAL)[:10]:
+            chall = DynamicChallenge.objects.create(
+                user=user,
+                name=f'{FAKE_REQCHALLENGE_NAME} {ind}',
+                description=FAKE_CHALLENGE_DESCRIPTION,
+                category=random.choice(FAKE_CHALLENGE_CATEGORIES),
+                solution=FAKE_SOLUTION,
+                state=STATE_LOCKED,
+            )
+
+            Flag.objects.create(
+                content=FAKE_FLAG,
+                challenge=chall
+            )
+            ind += 1
+
+        self.stdout.write("[+] Created challenge requests")
+
+    def accept_requests(self):
+        for chall in DynamicChallenge.objects.filter(state=STATE_LOCKED):
+            chall.state = STATE_VISIBLE
+            chall.save()
+
+        self.stdout.write("[+] Accepted challenge requests")
 
     def end_comps(self):
 

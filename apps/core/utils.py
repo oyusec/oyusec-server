@@ -18,6 +18,15 @@ def convert_to_localtime(utctime):
     return localtz.strftime(fmt)
 
 
+def calculate_percentage(a, b):
+    result = 0
+    try:
+        result = int(a / b * 100)
+    except Exception as e:
+        result = 0
+    return result
+
+
 def td_format(td_object):
     seconds = int(td_object.total_seconds())
     periods = [
