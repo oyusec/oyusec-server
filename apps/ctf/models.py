@@ -31,13 +31,14 @@ class Challenge(BaseModel):
     max_attempts = models.PositiveIntegerField("Max attempts", default=0)
     competition = models.ForeignKey(
         'competition.Competition',  on_delete=models.CASCADE, null=True, blank=True)
-    solution = models.TextField("Solution", default='')
+    solution = models.CharField(
+        "Solution", default='', max_length=500, null=True)
 
     class Meta:
         verbose_name = "Challenge"
 
     def __str__(self):
-        return f"{self.name} | {self.category} | {self.competition}"
+        return f"{self.name} |  {self.competition}"
 
     @classmethod
     def check_valid(cls, user, challenge, request):
