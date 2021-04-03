@@ -3,6 +3,7 @@ from apps.competition.consts import *
 AUTHENTICATION_REQUIRED = "Та эхлээд нэвтэрнэ үү"
 ACCESS_DENIED = "Таны эрх хүрэхгүй байна"
 
+SUCCESS = 'Амжилттай'
 SUCCESS_UPDATED = "Амжилттай шинэчлэлээ"
 SUCCESS_ADD = "Амжилттай нэмэгдлээ"
 SUCCESS_DELETED = "Амжилттай хасагдлаа"
@@ -42,8 +43,8 @@ FAKE_COMPETITION_LOCATIONS = ['онлайн', 'дэлхийд', 'монголд'
 # Mostly related challenges
 FAKE_CHALLENGE_NAME = 'Cyber Anxiety'
 FAKE_REQCHALLENGE_NAME = 'Will add'
-FAKE_CHALLENGE_CATEGORIES = ['reverse engineering', 'misc',
-                             'forensics', 'cryptography', 'binary exploitation', 'web']
+FAKE_CHALLENGE_CATEGORIES = ['Reverse engineering', 'Miscellaneous',
+                             'Forensics', 'Cryptography', 'Binary exploitation', 'Web']
 FAKE_CHALLENGE_DESCRIPTION = """RSA encryption is modular exponentiation of a message with an exponent `e` and a modulus `N` which is normally a product of two primes: `N = p * q`.
 
 Together the exponent and modulus form an RSA "public key" `(N, e)`. The most common value for e is `0x10001` or `65537`.
@@ -55,3 +56,25 @@ Together the exponent and modulus form an RSA "public key" `(N, e)`. The most co
 FAKE_SOLUTION = 'Use strings'
 
 FAKE_FLAG = 'flag{thisisdemo}'
+
+# Mostly related writeup
+FAKE_WRITEUP_CONTENT = """Манай найз python дээр код бичиж сурч байгаа юм аа. Тэр хэлэхдээ үүнийг бодож байж надтай цаашид найзлаарай гэсэн юм. Би найзыгаа алдахыг хүсэхгүй байна. Надад туслаач.
+
+```python
+from itertools import cycle
+from secret import key, flag
+
+assert len(key) == 3
+
+def enc(m):
+    ctext = []
+    for i, j in zip(m, cycle(key)): ctext.append(chr((ord(i) + ord(j)) % 95 + ord(' ')))
+    return ''.join(ctext)
+
+with open('enc.txt', 'w') as f:
+    f.write(enc(flag))
+```
+
+> enc.txt
+"""
+FAKE_REACTIONS = ['like', 'dislike']

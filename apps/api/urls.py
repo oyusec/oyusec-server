@@ -33,27 +33,36 @@ from apps.ctf.views import (
     ChallengeList,
     ChallengeAttempt,
     ChallengeRequest,
+    ChallengeView,
 
     Scoreboard,
+    Writeups,
+    WriteupView,
 
     ChallengeSolves,
     ChallengesSolves,
+    TodayTop,
 )
 
 from apps.competition.views import (
     Competitions,
     CompetitionView,
+    CompetitionComing,
     CompetitionScoreboard,
     CompetitionChallenges,
     CompetitionChallengesSolves,
 )
 
 urlpatterns = [
-    path('challenge/<str:uuid>/solves/', ChallengeSolves.as_view()),
     path('challenges/', ChallengeList.as_view()),
+    path('challenge/<str:uuid>/', ChallengeView.as_view()),
+    path('challenge/<str:uuid>/solves/', ChallengeSolves.as_view()),
     path('challenges/attempt/', ChallengeAttempt.as_view()),
     path('challenges/solves/', ChallengesSolves.as_view()),
     path('challenges/request/', ChallengeRequest.as_view()),
+    path('challenges/writeups/<str:uuid>/', Writeups.as_view()),
+    path('challenges/writeup/', WriteupView.as_view()),
+    path('challenges/today/top/', TodayTop.as_view()),
 
     # AUTHENTICATION
     path('auth/register/', AuthRegister.as_view()),
@@ -81,6 +90,7 @@ urlpatterns = [
 
     # COMPETITION
     path('competitions/', Competitions.as_view()),
+    path('competitions/coming/', CompetitionComing.as_view()),
     path('competition/<str:slug>/', CompetitionView.as_view()),
     path('competition/<str:slug>/challenges/', CompetitionChallenges.as_view()),
     path('competition/<str:slug>/scoreboard/', CompetitionScoreboard.as_view()),

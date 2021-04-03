@@ -534,7 +534,8 @@ class UserSolves(BaseView):
         if not user.is_authenticated:
             return Response({'success': True, 'data': response})
 
-        solves = Solve.objects.filter(user=user)
+        solves = Solve.objects.filter(
+            user=user, challenge__competition=None, challenge__state__contains=STATE_VISIBLE)
         for solve in solves:
             response.append({
                 'challenge_id': solve.challenge.uuid

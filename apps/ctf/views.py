@@ -1,3 +1,4 @@
+from django.db.models import F, Count
 from datetime import datetime, timezone
 from rest_framework.response import Response
 from apps.api.views import BaseView
@@ -12,6 +13,7 @@ from apps.competition.models import (
     Competition,
     CompetitionUser
 )
+
 from apps.core.utils import (
     convert_to_localtime,
     td_format,
@@ -25,35 +27,34 @@ class ChallengeList(BaseView):
     """
 
     def get(self, request):
-        user = request.user
         challenges = Challenge.objects.filter(
-            state=STATE_VISIBLE, competition=None).order_by('value')
-        response = self.serialize(challenges, user)
-        return Response({'success': True, 'data': response})
+            state=STATE_VISIBLE, competition=None).values('uuid', 'name', 'category', author=F('user__username'))
+        return Response({'success': True, 'data': list(challenges)})
 
-    def serialize(self, challenges, user):
-        ret = []
 
-        for challenge in challenges:
-            ret.append({
-                'author': {
-                    'username': challenge.user.username,
-                    'slug': challenge.user.slug,
-                },
-                'name': challenge.name,
-                'value': challenge.value,
-                'description': challenge.description,
-                'id': challenge.uuid,
-                'status': 'unsolved',
-                'state': challenge.state,
-                'category': challenge.category,
-                'competition': False
-            })
-            # if challenge.category not in ret.keys():
-            #     ret[challenge.category] = []
+class ChallengeView(BaseView):
 
-            # ret[challenge.category].append(data)
-        return ret
+    def get(self, request, uuid):
+        chall = Challenge.objects.filter(uuid=uuid).first()
+
+        if not chall:
+            return Response({'success': False})
+
+        resp = self.serialize(chall=chall, req=request)
+
+        return Response({'success': True, 'data': resp})
+
+    def serialize(self, chall, req):
+        return {
+            'author': {
+                'username': chall.user.username,
+                'slug': chall.user.slug
+            },
+            'name': chall.name,
+            'value': chall.value,
+            'description': chall.description,
+            'id': chall.uuid,
+        }
 
 
 class ChallengeAttempt(BaseView):
@@ -177,10 +178,7 @@ class ChallengeRequest(BaseView):
             user=user,
             name=data['name'],
             description=data['description'],
-            value=data['value'],
             category=data['category'].lower(),
-            minimum=data['minimum'],
-            decay=data['decay'],
             solution=data['solution'],
             state=STATE_LOCKED,
         )
@@ -220,8 +218,8 @@ class ChallengeRequest(BaseView):
 class ChallengesSolves(BaseView):
     def get(self, request):
         challenges = Challenge.objects.filter(
-            state=STATE_VISIBLE
-        )
+            state=STATE_VISIBLE, competition=None)
+
         response = self.serialize(challenges)
 
         return Response({'success': True, 'data': response})
@@ -231,7 +229,7 @@ class ChallengesSolves(BaseView):
         for challenge in challenges:
             solves = Solve.objects.filter(challenge=challenge).count()
             ret.append({
-                'challengeID': challenge.uuid,
+                'id': challenge.uuid,
                 'solves': solves
             })
         return ret
@@ -293,6 +291,7 @@ class Scoreboard(BaseView):
     def get_contest_rating(self, user):
         total_rating, total_win = 0, 0
         for compUser in CompetitionUser.objects.filter(user=user, competition__status__contains=COMPETITION_ARCHIVE):
+
             total_rating += compUser.rating
             total_win += 1 if compUser.place == 1 else 0
 
@@ -310,3 +309,191 @@ class Scoreboard(BaseView):
             else:
                 total[solve.user.username] += 1
         return total
+
+
+class Writeups(BaseView):
+
+    def get(self, request, uuid):
+        user = request.user
+
+        chall = Challenge.objects.filter(uuid=uuid).first()
+
+        if not chall:
+            return Response({'success': False, 'detail': SOMETHING_WRONG})
+
+        status, message = self.check_valid(user=user, challenge=chall)
+
+        if not status:
+            return Response({'success': False, 'detail': message})
+
+        response = self.serialize(user=user, challenge=chall)
+
+        return Response({'success': True, 'data': response, 'challenge': {'name': chall.name, 'id': chall.uuid}})
+
+    def check_valid(self, user, challenge):
+        if challenge.competition and challenge.competition.status == COMPETITION_ARCHIVE and challenge.state == STATE_VISIBLE:
+            return True, SUCCESS
+        elif not user.is_authenticated:
+            return False, AUTHENTICATION_REQUIRED
+
+        if Solve.objects.filter(user=user, challenge=challenge).exists() or challenge.user.username == user.username:
+            return True, SUCCESS
+
+        return False, SOMETHING_WRONG
+
+    def serialize(self, user, challenge):
+        res, writeups = [], []
+        for _ in Writeup.objects.filter(challenge=challenge):
+            like = WriteupUser.objects.filter(
+                writeup=_, reaction=REACTION_LIKE).count()
+            dislike = WriteupUser.objects.filter(
+                writeup=_, reaction=REACTION_DISLIKE).count()
+            power = like - dislike
+            writeups.append({'id': _.uuid, 'power': power})
+
+        for _ in writeups:
+            writeup = Writeup.objects.get(uuid=_['id'])
+            res.append({
+                'power': _['power'],
+                'id': writeup.uuid,
+                'name': writeup.challenge.name,
+                'created': convert_to_localtime(writeup.created_date).split(' ')[0],
+                'content': writeup.content,
+                'status': False,
+                'author': {
+                    'username': writeup.author.username,
+                    'slug': writeup.author.slug,
+                }
+            })
+            if user.is_authenticated:
+                userWriteup = WriteupUser.objects.filter(
+                    author=user, writeup=writeup).first()
+                if userWriteup:
+                    res[len(res)-1]['status'] = userWriteup.reaction
+
+        return res
+
+    def post(self, request):
+        data = request.data
+        user = request.user
+
+        action = data['action']
+
+        if not user.is_authenticated:
+            return Response({'success': False, 'detail': AUTHENTICATION_REQUIRED})
+
+        writeup = Writeup.objects.get(uuid=data['id'])
+        writeUser = WriteupUser.objects.filter(
+            author=request.user, writeup=writeup).first()
+
+        if not writeUser:
+            WriteupUser.objects.create(
+                writeup=writeup,
+                author=user,
+                reaction=action
+            )
+            return Response({'success': True})
+
+        if action == REACTION_DISLIKE:
+            if writeUser.reaction == REACTION_DISLIKE:
+                writeUser.delete()
+                return Response({'success': True})
+            elif writeUser.reaction == REACTION_LIKE:
+                writeUser.reaction = REACTION_DISLIKE
+
+        elif action == 'like':
+            if writeUser.reaction == REACTION_LIKE:
+                writeUser.delete()
+                return Response({'success': True})
+
+            elif writeUser.reaction == REACTION_DISLIKE:
+                writeUser.reaction = REACTION_LIKE
+
+        writeUser.save()
+
+        return Response({'success': True})
+
+
+class WriteupView(BaseView):
+    def post(self, request):
+        status, message = self.check_valid(request)
+
+        if not status:
+            return Response({'success': False, 'detail': message})
+
+        if request.data['action'] == 'add':
+            response = self.add(request)
+
+            return Response({'success': True, 'data': response})
+
+        return Response({'success': False})
+
+    def add(self, req):
+        user = req.user
+        data = req.data
+
+        chall = Challenge.objects.get(uuid=data['id'])
+
+        writeup = Writeup.objects.create(
+            author=user,
+            challenge=chall,
+            content=data['data'],
+        )
+        return {
+            'power': 0,
+            'id': writeup.uuid,
+            'name': writeup.challenge.name,
+            'created': convert_to_localtime(writeup.created_date).split(' ')[0],
+            'content': writeup.content,
+            'status': False,
+            'author': {
+                'username': writeup.author.username,
+                'slug': writeup.author.slug,
+            }
+        }
+
+    def check_valid(self, req):
+        user = req.user
+        data = req.data
+
+        if not user.is_authenticated:
+            return False, AUTHENTICATION_REQUIRED
+
+        chall = Challenge.objects.filter(uuid=data['id']).first()
+
+        if not chall:
+            return False, NOT_FOUND
+
+        if chall.competition and chall.competition.status == COMPETITION_ARCHIVE:
+            return True, SUCCESS
+
+        solve = Solve.objects.filter(user=user, challenge=chall).first()
+
+        if solve or chall.user.username == user.username:
+            return True, SUCCESS
+
+        return False, SOMETHING_WRONG
+
+
+class TodayTop(BaseView):
+    def get(self, request):
+        top = Solve.objects.filter(created_date__gte=timezone.localtime().replace(hour=0, minute=0, second=0)).annotate(
+            player=Count('user')).order_by('-player').select_related('user').first()
+        if not top:
+            return Response({
+                'success': False
+            })
+
+        return Response({
+            'success': True,
+            'data': {
+                'user': {
+                    'username': top.user.username,
+                    'slug': top.user.slug,
+                    'img': 'https://avatar.ctflearn.com/aae0b980cce0b34fcfed8908bba52905.png',
+                },
+                'total_solved': Solve.get_total_solved(user=top.user),
+                'total_score': Solve.get_score(user=top.user),
+                'total_comp': CompetitionUser.objects.filter(user=top.user).count()
+            }
+        })

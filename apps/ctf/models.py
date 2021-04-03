@@ -32,7 +32,7 @@ class Challenge(BaseModel):
     competition = models.ForeignKey(
         'competition.Competition',  on_delete=models.CASCADE, null=True, blank=True)
     solution = models.CharField(
-        "Solution", default='', max_length=500, null=True)
+        "Solution", default='', max_length=500, null=True, blank=True)
 
     class Meta:
         verbose_name = "Challenge"
@@ -185,7 +185,7 @@ class Solve(Submission):
         return f"{self.user.username} | {self.challenge.name}"
 
     @ classmethod
-    def get_score(cls, user, competition):
+    def get_score(cls, user, competition=None):
         result = Solve.objects.filter(user=user, challenge__state__contains=STATE_VISIBLE, challenge__competition=competition).aggregate(
             models.Sum('challenge__value'))['challenge__value__sum']
 
@@ -215,3 +215,36 @@ class Hint(BaseModel):
 
     def __str__(self):
         return f'{self.challenge.name} | {self.content}'
+
+
+class Writeup(BaseModel):
+    REQUIRED_FIELDS = ['challenge']
+
+    challenge = models.ForeignKey(
+        Challenge, verbose_name='Challenge', on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        BaseUser, verbose_name='Author', on_delete=models.CASCADE, related_name='author')
+
+    content = models.TextField('Content')
+
+    class Meta:
+        verbose_name = 'Writeup'
+
+    def __str__(self):
+        return f'{self.author.username} | {self.challenge.name}'
+
+
+class WriteupUser(BaseModel):
+    author = models.ForeignKey(
+        BaseUser, verbose_name='Writeup User', on_delete=models.CASCADE, null=True, related_name='writeup_user')
+    writeup = models.ForeignKey(
+        Writeup, verbose_name='Writeup', on_delete=models.CASCADE)
+
+    reaction = models.CharField("Reaction", choices=REACTION_CHOICES,
+                                max_length=100, default=REACTION_LIKE)
+
+    class Meta:
+        verbose_name = 'Writeup User'
+
+    def __str__(self):
+        return f'{self.author.username} | {self.writeup.challenge.name} | {self.reaction}'

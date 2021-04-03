@@ -148,3 +148,17 @@ class CompetitionScoreboard(BaseView):
         standings = get_standings(competition)
 
         return Response({'success': True, 'data': standings})
+
+
+class CompetitionComing(BaseView):
+    def get(self, request):
+        comp = Competition.objects.filter(
+            status=COMPETITION_COMING).values('start_date', 'weight', 'name', 'enrollment').order_by('start_date').first()
+        if not comp:
+            return Response({'success': False})
+        return Response({'success': True, 'data': {
+            'start_date': convert_to_localtime(comp['start_date']),
+            'name': comp['name'],
+            'weight': comp['weight'],
+            'enrollment': comp['enrollment']
+        }})

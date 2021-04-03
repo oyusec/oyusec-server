@@ -5,6 +5,8 @@ from apps.core.models import BaseUser, BaseUserProfile
 from apps.ctf.models import (
     StandardChallenge,
     DynamicChallenge,
+    WriteupUser,
+    Writeup,
     Challenge,
     Solve,
     Flag,
@@ -33,6 +35,8 @@ class Command(BaseCommand):
         self.create_solves()
         self.create_requests()
         self.accept_requests()
+        self.create_writeups()
+        self.create_reactions()
 
         # Misc
         self.end_comps()
@@ -78,9 +82,9 @@ class Command(BaseCommand):
                 location=random.choice(FAKE_COMPETITION_LOCATIONS),
                 enrollment=random.choice([ENROLLMENT_SOLO, ENROLLMENT_TEAM]),
                 start_date=make_aware(
-                    datetime(2021, 3, rand_date, rand_hour, 0)),
+                    datetime(2021, 4, rand_date, rand_hour, 0)),
                 end_date=make_aware(
-                    datetime(2021, 3, rand_date + 1, rand_hour, 0)),
+                    datetime(2021, 4, rand_date + 1, rand_hour, 0)),
                 photo=random.choice(FAKE_IMAGES),
                 status=random.choice(FAKE_STATUS),
                 weight=random.randint(20, 60)
@@ -180,3 +184,27 @@ class Command(BaseCommand):
             competition.calculate_result(competition=competition)
 
         self.stdout.write('[+] Calculated competition_result')
+
+    def create_writeups(self):
+
+        for user in BaseUser.objects.all()[:5]:
+            for chall in Challenge.objects.all():
+                Writeup.objects.create(
+                    author=user,
+                    challenge=chall,
+                    content=FAKE_WRITEUP_CONTENT,
+                )
+
+        self.stdout.write('[+] Created writeups')
+
+    def create_reactions(self):
+
+        for user in BaseUser.objects.all()[20:30]:
+            for writeup in Writeup.objects.all()[10:50]:
+                WriteupUser.objects.create(
+                    author=user,
+                    writeup=writeup,
+                    reaction=random.choice(FAKE_REACTIONS)
+                )
+
+        self.stdout.write('[+] Created reactions')
